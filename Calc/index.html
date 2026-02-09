@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Fyzikální Kalkulačka – 1. ročník SŠ</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3a8a">
+
+<style>
+  :root {
+    --bg: #f4f4f9;
+    --text: #222;
+    --header-bg: #1e3a8a;
+    --accent: #2563eb;
+    --card-bg: #ffffff;
+    --button-bg: #1e3a8a;
+    --button-text: #ffffff;
+    --muted: #555;
+  }
+  .dark {
+    --bg: #0b1220;
+    --text: #e6eef8;
+    --header-bg: #0f1724;
+    --accent: #1e40af;
+    --card-bg: #071122;
+    --button-bg: #111827;
+    --button-text: #e6eef8;
+    --muted: #9aa3b2;
+  }
+  body { font-family: Arial; margin:0; padding:0; background:var(--bg); color:var(--text); }
+  header { background:var(--header-bg); color:var(--button-text); padding:1rem; text-align:center; position:relative; }
+  h2 { background:var(--accent); color:var(--button-text); padding:0.5rem; margin:0; }
+  section { padding:1rem; border-bottom:1px solid rgba(0,0,0,0.08); }
+  label, select, input { display:block; margin:0.5rem 0; }
+  input, select, textarea {
+    padding:0.4rem;
+    width:100%;
+    max-width:300px;
+    background:transparent;
+    color:var(--text);
+    border:1px solid rgba(0,0,0,0.12);
+    border-radius:4px;
+  }
+  button {
+    padding:0.5rem 1rem;
+    margin-top:0.5rem;
+    background:var(--button-bg);
+    color:var(--button-text);
+    border:none;
+    cursor:pointer;
+  }
+  .result { margin-top:0.5rem; font-weight:bold; }
+  .formula { font-style:italic; color:var(--muted); }
+  .theme-toggle {
+    position:absolute;
+    right:1rem;
+    top:1rem;
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.2);
+    color:var(--button-text);
+    padding:0.3rem 0.5rem;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  @media (min-width:600px) {
+    section { display:flex; flex-wrap:wrap; gap:2rem; }
+    div.calc-block {
+      flex:1 1 300px;
+      background:var(--card-bg);
+      padding:1rem;
+      border-radius:8px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.06);
+    }
+  }
+</style>
+</head>
+
+<body>
+<header>
+<h1>Fyzikální Kalkulačka – 1. ročník SŠ</h1>
+<button id="darkToggle" class="theme-toggle">🌙</button>
+</header>
+
+<!-- ====================== ROVNOMĚRNÝ POHYB ====================== -->
+<section id="rovnomerny">
+<h2>1) Rovnoměrný pohyb</h2>
+<div class="calc-block">
+<label for="rm_want">Chci spočítat:</label>
+<select id="rm_want">
+  <option value="v">Rychlost v [m/s]</option>
+  <option value="s">Dráhu s [m]</option>
+  <option value="t">Čas t [s]</option>
+</select>
+<label for="v">v [m/s]:</label><input type="number" id="v" step="any">
+<label for="s">s [m]:</label><input type="number" id="s" step="any">
+<label for="t">t [s]:</label><input type="number" id="t" step="any">
+<button onclick="calcRovnomerny()">Spočítat</button>
+<div class="result" id="rm_result"></div>
+<div class="formula" id="rm_formula"></div>
+</div>
+</section>
+
+<!-- ====================== ROVNOMĚRNĚ ZRYCHLENÝ ====================== -->
+<section id="rovnomerneZrychleny">
+<h2>2) Rovnoměrně zrychlený / zpomalený pohyb</h2>
+<div class="calc-block">
+<label for="rz_want">Chci spočítat:</label>
+<select id="rz_want">
+  <option value="v">v</option>
+  <option value="v0">v₀</option>
+  <option value="a">a</option>
+  <option value="t">t</option>
+  <option value="s">s</option>
+</select>
+<label for="v2">v [m/s]:</label><input type="number" id="v2" step="any">
+<label for="v02">v₀ [m/s]:</label><input type="number" id="v02" step="any">
+<label for="a2">a [m/s²]:</label><input type="number" id="a2" step="any">
+<label for="t2">t [s]:</label><input type="number" id="t2" step="any">
+<label for="s2">s [m]:</label><input type="number" id="s2" step="any">
+<button onclick="calcRovnomerneZrychleny()">Spočítat</button>
+<div class="result" id="rz_result"></div>
+<div class="formula" id="rz_formula"></div>
+</div>
+</section>
+
+<!-- ====================== POHYB PO KRUŽNICI ====================== -->
+<section id="pohybKruznice">
+<h2>3) Pohyb po kružnici</h2>
+<div class="calc-block">
+<label for="pk_want">Chci spočítat:</label>
+<select id="pk_want">
+<option value="v">v</option>
+<option value="r">r</option>
+<option value="T">T</option>
+<option value="a_d">a_d</option>
+<option value="F_d">F_d</option>
+<option value="m">m</option>
+</select>
+<label for="v3">v [m/s]:</label><input type="number" id="v3" step="any">
+<label for="r3">r [m]:</label><input type="number" id="r3" step="any">
+<label for="T3">T [s]:</label><input type="number" id="T3" step="any">
+<label for="a_d3">a_d [m/s²]:</label><input type="number" id="a_d3" step="any">
+<label for="F_d3">F_d [N]:</label><input type="number" id="F_d3" step="any">
+<label for="m3">m [kg]:</label><input type="number" id="m3" step="any">
+<button onclick="calcPohybKruznice()">Spočítat</button>
+<div class="result" id="pk_result"></div>
+<div class="formula" id="pk_formula"></div>
+</div>
+</section>
+
+<!-- ====================== DYNAMIKA ====================== -->
+<section id="dynamika">
+<h2>4) Dynamika – Newtonovy zákony</h2>
+<div class="calc-block">
+<label for="dyn_want">Chci spočítat:</label>
+<select id="dyn_want">
+<option value="F">F [N]</option>
+<option value="m">m [kg]</option>
+<option value="a">a [m/s²]</option>
+</select>
+<label for="F4">F [N]:</label><input type="number" id="F4" step="any">
+<label for="m4">m [kg]:</label><input type="number" id="m4" step="any">
+<label for="a4">a [m/s²]:</label><input type="number" id="a4" step="any">
+<button onclick="calcDynamika()">Spočítat</button>
+<div class="result" id="dyn_result"></div>
+<div class="formula" id="dyn_formula"></div>
+</div>
+</section>
+
+<!-- ====================== HYBNOST ====================== -->
+<section id="hybnost">
+<h2>5) Hybnost</h2>
+<div class="calc-block">
+<label for="hyb_want">Chci spočítat:</label>
+<select id="hyb_want">
+<option value="p">p [kg·m/s]</option>
+<option value="m">m [kg]</option>
+<option value="v">v [m/s]</option>
+<option value="delta_p">Δp [kg·m/s]</option>
+</select>
+<label for="p5">p [kg·m/s]:</label><input type="number" id="p5" step="any">
+<label for="m5">m [kg]:</label><input type="number" id="m5" step="any">
+<label for="v5">v [m/s]:</label><input type="number" id="v5" step="any">
+<label for="v05">v₀ [m/s]:</label><input type="number" id="v05" step="any">
+<label for="delta_p5">Δp [kg·m/s]:</label><input type="number" id="delta_p5" step="any">
+<button onclick="calcHybnost()">Spočítat</button>
+<div class="result" id="hyb_result"></div>
+<div class="formula" id="hyb_formula"></div>
+</div>
+</section>
+
+<!-- ====================== TŘENÍ ====================== -->
+<section id="treni">
+<h2>6) Tření</h2>
+<div class="calc-block">
+<label for="tr_want">Chci spočítat:</label>
+<select id="tr_want">
+<option value="N">Normálová síla N [N]</option>
+<option value="m">Hmotnost m [kg]</option>
+<option value="F_t">Třecí síla F_t [N]</option>
+<option value="mu">Třecí koeficient μ</option>
+</select>
+<label for="N6">N [N]:</label><input type="number" id="N6" step="any">
+<label for="m6">m [kg]:</label><input type="number" id="m6" step="any">
+<label for="F_t6">F_t [N]:</label><input type="number" id="F_t6" step="any">
+<label for="mu6">μ:</label><input type="number" id="mu6" step="any">
+<button onclick="calcTreni()">Spočítat</button>
+<div class="result" id="tr_result"></div>
+<div class="formula" id="tr_formula"></div>
+</div>
+</section>
+
+<!-- ====================== GRAVITACE ====================== -->
+<section id="gravitace">
+<h2>7) Gravitační síla</h2>
+<div class="calc-block">
+<label for="grav_want">Chci spočítat:</label>
+<select id="grav_want">
+<option value="Fg">F_g [N]</option>
+<option value="m1">m₁ [kg]</option>
+<option value="m2">m₂ [kg]</option>
+<option value="r">r [m]</option>
+</select>
+<label for="Fg7">F_g [N]:</label><input type="number" id="Fg7" step="any">
+<label for="m17">m₁ [kg]:</label><input type="number" id="m17" step="any">
+<label for="m27">m₂ [kg]:</label><input type="number" id="m27" step="any">
+<label for="r7">r [m]:</label><input type="number" id="r7" step="any">
+<button onclick="calcGravitace()">Spočítat</button>
+<div class="result" id="grav_result"></div>
+<div class="formula" id="grav_formula"></div>
+</div>
+</section>
+
+<script>
+const g = 9.81;
+const G = 6.674e-11;
+
+// ======= Rovnoměrný pohyb =======
+function calcRovnomerny() {
+  let v = parseFloat(document.getElementById('v').value);
+  let s = parseFloat(document.getElementById('s').value);
+  let t = parseFloat(document.getElementById('t').value);
+  let want = document.getElementById('rm_want').value;
+  let res, formula;
+  if(want==='v'){ res=s/t; formula="v = s / t"; }
+  if(want==='s'){ res=v*t; formula="s = v · t"; }
+  if(want==='t'){ res=s/v; formula="t = s / v"; }
+  document.getElementById('rm_result').innerText=`Výsledek: ${res}`;
+  document.getElementById('rm_formula').innerText=`Použitý vzorec: ${formula}`;
+}
+
+// ======= Rovnoměrně zrychlený =======
+function calcRovnomerneZrychleny() {
+  let v=parseFloat(document.getElementById('v2').value);
+  let v0=parseFloat(document.getElementById('v02').value);
+  let a=parseFloat(document.getElementById('a2').value);
+  let t=parseFloat(document.getElementById('t2').value);
+  let s=parseFloat(document.getElementById('s2').value);
+  let want=document.getElementById('rz_want').value;
+  let res, formula;
+  switch(want){
+    case 'v':
+      if(!isNaN(v0)&&!isNaN(a)&&!isNaN(t)){res=v0+a*t; formula="v = v₀ + a·t";}
+      else if(!isNaN(v0)&&!isNaN(a)&&!isNaN(s)){res=Math.sqrt(v0**2 + 2*a*s); formula="v = √(v₀² + 2·a·s)";}
+      break;
+    case 'v0':
+      if(!isNaN(v)&&!isNaN(a)&&!isNaN(t)){res=v-a*t; formula="v₀ = v - a·t";}
+      else if(!isNaN(v)&&!isNaN(a)&&!isNaN(s)){res=Math.sqrt(v**2 - 2*a*s); formula="v₀ = √(v² - 2·a·s)";}
+      break;
+    case 'a':
+      if(!isNaN(v)&&!isNaN(v0)&&!isNaN(t)){res=(v-v0)/t; formula="a = (v - v₀)/t";}
+      else if(!isNaN(v)&&!isNaN(v0)&&!isNaN(s)){res=(v**2 - v0**2)/(2*s); formula="a = (v² - v₀²)/(2·s)";}
+      else if(!isNaN(s)&&!isNaN(v0)&&!isNaN(t)){res=2*(s-v0*t)/(t**2); formula="a = 2·(s - v₀·t)/t²";}
+      break;
+    case 't':
+      if(!isNaN(v)&&!isNaN(v0)&&!isNaN(a)){res=(v-v0)/a; formula="t = (v - v₀)/a";}
+      break;
+    case 's':
+      if(!isNaN(v0)&&!isNaN(a)&&!isNaN(t)){res=v0*t+0.5*a*t**2; formula="s = v₀·t + ½·a·t²";}
+      else if(!isNaN(v)&&!isNaN(v0)&&!isNaN(a)){res=(v**2 - v0**2)/(2*a); formula="s = (v² - v₀²)/(2·a)";}
+      break;
+  }
+  document.getElementById('rz_result').innerText=`Výsledek: ${res}`;
+  document.getElementById('rz_formula').innerText=`Použitý vzorec: ${formula}`;
+}
+
+// ======= Pohyb po kružnici =======
+function calcPohybKruznice() {
+  let v=parseFloat(document.getElementById('v3').value);
+  let r=parseFloat(document.getElementById('r3').value);
+  let T=parseFloat(document.getElementById('T3').value);
+  let a_d=parseFloat(document.getElementById('a_d3').value);
+  let F_d=parseFloat(document.getElementById('F_d3').value);
+  let m=parseFloat(document.getElementById('m3').value);
+  let want=document.getElementById('pk_want').value;
+  let res, formula;
+  switch(want){
+    case 'v':
+      if(!isNaN(r)&&!isNaN(T)){res=2*Math.PI*r/T; formula="v = 2·π·r / T";}
+      else if(!isNaN(a_d)&&!isNaN(r)){res=Math.sqrt(a_d*r); formula="v = √(a_d · r)";}
+      else if(!isNaN(F_d)&&!isNaN(m)&&!isNaN(r)){res=Math.sqrt(F_d*r/m); formula="v = √(F_d·r / m)";}
+      break;
+    case 'r':
+      if(!isNaN(v)&&!isNaN(T)){res=v*T/(2*Math.PI); formula="r = v·T / (2·π)";}
+      else if(!isNaN(a_d)&&!isNaN(v)){res=v**2/a_d; formula="r = v² / a_d";}
+      else if(!isNaN(F_d)&&!isNaN(m)&&!isNaN(v)){res=m*v**2/F_d; formula="r = m·v² / F_d";}
+      break;
+    case 'T': if(!isNaN(v)&&!isNaN(r)){res=2*Math.PI*r/v; formula="T = 2·π·r / v";} break;
+    case 'a_d': if(!isNaN(v)&&!isNaN(r)){res=v**2/r; formula="a_d = v² / r";} break;
+    case 'F_d': if(!isNaN(m)&&!isNaN(v)&&!isNaN(r)){res=m*v**2/r; formula="F_d = m·v² / r";} break;
+    case 'm': if(!isNaN(F_d)&&!isNaN(v)&&!isNaN(r)){res=F_d*r/v**2; formula="m = F_d·r / v²";} break;
+  }
+  document.getElementById('pk_result').innerText=`Výsledek: ${res}`;
+  document.getElementById('pk_formula').innerText=`Použitý vzorec: ${formula}`;
+}
+
+// ======= Dynamika =======
+function calcDynamika() {
+  let F=parseFloat(document.getElementById('F4').value);
+  let m=parseFloat(document.getElementById('m4').value);
+  let a=parseFloat(document.getElementById('a4').value);
+  let want=document.getElementById('dyn_want').value;
+  let res, formula;
+  switch(want){
+    case 'F': res=m*a; formula="F = m · a"; break;
+    case 'm': res=F/a; formula="m = F / a"; break;
+    case 'a': res=F/m; formula="a = F / m"; break;
+  }
+  document.getElementById('dyn_result').innerText=`Výsledek: ${res}`;
+  document.getElementById('dyn_formula').innerText=`Použitý vzorec: ${formula}`;
+}
+
+// ======= Hybnost =======
+function calcHybnost() {
+  let p=parseFloat(document.getElementById('p5').value);
+  let m=parseFloat(document.getElementById('m5').value);
+  let v=parseFloat(document.getElementById('v5').value);
+  let v0=parseFloat(document.getElementById('v05').value);
+  let delta_p=parseFloat(document.getElementById('delta_p5').value);
+  let want=document.getElementById('hyb_want').value;
+  let res, formula;
+  switch(want){
+    case 'p': if(!isNaN(m)&&!isNaN(v)){res=m*v; formula="p = m · v";} break;
+    case 'm': if(!isNaN(p)&&!isNaN(v)){res=p/v; formula="m = p / v";} break;
+    case 'v': if(!isNaN(p)&&!isNaN(m)){res=p/m; formula="v = p / m";} break;
+    case 'delta_p': if(!isNaN(m)&&!isNaN(v)&&!isNaN(v0)){res=m*(v-v0); formula="Δp = m · (v - v₀)";} break;
+  }
+  document.getElementById('hyb_result').innerText=`Výsledek: ${res}`;
+  document.getElementById('hyb_formula').innerText=`Použitý vzorec: ${formula}`;
+}
+
+// ======= Tření =======
+function calcTreni() {
+  let N=parseFloat(document.getElementById('N6').value);
+  let m=parseFloat(document.getElementById('m6').value);
+  let F_t=parseFloat(document.getElementById('F_t6').value);
+  let mu=parseFloat(document.getElementById('mu6').value);
+  let want=document.getElementById('tr_want').value;
+  let res, formula;
+  switch(want){
+    case 'N': if(!isNaN(m)){res=m*g; formula="N = m · g";} break;
+    case 'm': if(!isNaN(N)){res=N/g; formula="m = N / g";} break;
+    case 'F_t': if(!isNaN(mu)&&!isNaN(N)){res=mu*N; formula="F_t = μ · N";} break;
+    case 'mu': if(!isNaN(F_t)&&!isNaN(N)){res=F_t/N; formula="μ = F_t / N";} break;
+  }
+  document.getElementById('tr_result').innerText=`Výsledek: ${res}`;
+  document.getElementById('tr_formula').innerText=`Použitý vzorec: ${formula}`;
+}
+
+// ======= Gravitační síla =======
+function calcGravitace() {
+  let Fg=parseFloat(document.getElementById('Fg7').value);
+  let m1=parseFloat(document.getElementById('m17').value);
+  let m2=parseFloat(document.getElementById('m27').value);
+  let r=parseFloat(document.getElementById('r7').value);
+  let want=document.getElementById('grav_want').value;
+  let res, formula;
+  switch(want){
+    case 'Fg': if(!isNaN(m1)&&!isNaN(m2)&&!isNaN(r)){res=G*m1*m2/r**2; formula="F_g = G·(m₁·m₂) / r²";} break;
+    case 'm1': if(!isNaN(Fg)&&!isNaN(m2)&&!isNaN(r)){res=Fg*r**2/(G*m2); formula="m₁ = F_g·r² / (G·m₂)";} break;
+    case 'm2': if(!isNaN(Fg)&&!isNaN(m1)&&!isNaN(r)){res=Fg*r**2/(G*m1); formula="m₂ = F_g·r² / (G·m₁)";} break;
+    case 'r': if(!isNaN(Fg)&&!isNaN(m1)&&!isNaN(m2)){res=Math.sqrt(G*m1*m2/Fg); formula="r = √(G·m₁·m₂ / F_g)";} break;
+  }
+  document.getElementById('grav_result').innerText=`Výsledek: ${res}`;
+  document.getElementById('grav_formula').innerText=`Použitý vzorec: ${formula}`;
+}
+
+// ======= Dark mode toggle =======
+(function(){
+  const key = 'theme';
+  const btn = document.getElementById('darkToggle');
+  function applyTheme(mode){
+    if(mode==='dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+    if(btn) btn.innerText = mode==='dark' ? '☀️' : '🌙';
+    if(btn) btn.setAttribute('aria-pressed', mode==='dark');
+  }
+  function currentPreference(){
+    const saved = localStorage.getItem(key);
+    if(saved) return saved;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  applyTheme(currentPreference());
+  if(btn){
+    btn.addEventListener('click', ()=>{
+      const isDark = document.documentElement.classList.toggle('dark');
+      const mode = isDark ? 'dark' : 'light';
+      localStorage.setItem(key, mode);
+      btn.innerText = isDark ? '☀️' : '🌙';
+      btn.setAttribute('aria-pressed', isDark);
+    });
+  }
+})();
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js");
+  });
+}
+</script>
+
+</body>
+</html>
